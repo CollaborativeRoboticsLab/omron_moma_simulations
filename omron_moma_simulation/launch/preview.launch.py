@@ -27,6 +27,10 @@ def create_preview(context):
             'model': 'ld250_tm12x',
             'gui': LaunchConfiguration('gui'),
             'world': LaunchConfiguration('world'),
+            'randomize_boxes': LaunchConfiguration('randomize_boxes'),
+            'box_seed': LaunchConfiguration('box_seed'),
+            'randomize_objects': LaunchConfiguration('randomize_objects'),
+            'object_seed': LaunchConfiguration('object_seed'),
             'x': LaunchConfiguration('x'),
             'y': LaunchConfiguration('y'),
             'z': LaunchConfiguration('z'),
@@ -40,7 +44,11 @@ def create_preview(context):
 def generate_launch_description():
     return LaunchDescription([
         DeclareLaunchArgument('gui', default_value='true', description='Start the Gazebo graphical client'),
-        DeclareLaunchArgument('world', default_value='empty', description='empty or warehouse'),
+        DeclareLaunchArgument('world', default_value='empty', description='empty, grasp_test, or warehouse'),
+        DeclareLaunchArgument('randomize_boxes', default_value='false', description='Randomize warehouse box positions'),
+        DeclareLaunchArgument('box_seed', default_value='', description='Optional seed for warehouse box positions'),
+        DeclareLaunchArgument('randomize_objects', default_value='false', description='Randomize grasp-test object positions'),
+        DeclareLaunchArgument('object_seed', default_value='', description='Optional seed for grasp-test object positions'),
         DeclareLaunchArgument('x', default_value='0.0', description='Spawn X position in meters'),
         DeclareLaunchArgument('y', default_value='0.0', description='Spawn Y position in meters'),
         DeclareLaunchArgument('z', default_value='0.0', description='Spawn Z position in meters'),

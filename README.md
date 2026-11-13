@@ -44,7 +44,21 @@ ros2 launch omron_moma_simulation preview.launch.py gripper:=soft_two_fingers wo
 
 The warehouse layout is local; the first launch downloads its models from Gazebo
 Fuel. Set `x`, `y`, `z` (meters) and `yaw` (radians) to choose the robot's spawn
-pose. See the AMR simulation README for world attribution.
+pose. Three open racks near `(-2.7, 0)` hold 20 movable colored boxes. Their
+positions are fixed by default; use `randomize_boxes:=true` to shuffle them,
+and optionally `box_seed:=42` for a repeatable layout. See the AMR simulation
+README for object details and world attribution.
+
+For a separate grasp-testing world with five tables and dynamic objects:
+
+```bash
+ros2 launch omron_moma_simulation preview.launch.py gripper:=soft_two_fingers world:=grasp_test
+```
+
+Each table holds a cube, cylinder, sphere, block, and bottle. Set
+`randomize_objects:=true` to shuffle their positions on each table, and
+optionally `object_seed:=42` for a repeatable layout. The static robot and
+gripper cannot pick them up yet. See the AMR simulation README for object details.
 
 Following are the supported gripper configurations and their corresponding descriptions(external package dependencies)
 
