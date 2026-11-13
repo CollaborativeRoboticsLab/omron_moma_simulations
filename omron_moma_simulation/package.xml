@@ -8,9 +8,19 @@
   <buildtool_depend>ament_cmake</buildtool_depend>
   <exec_depend>ament_index_python</exec_depend>
   <exec_depend>grasping_description_omron_moma</exec_depend>
+  <exec_depend>controller_manager</exec_depend>
+  <exec_depend>control_msgs</exec_depend>
+  <exec_depend>gripper_ros</exec_depend>
+  <exec_depend>gz_ros2_control</exec_depend>
+  <exec_depend>joint_state_broadcaster</exec_depend>
+  <exec_depend>joint_trajectory_controller</exec_depend>
   <exec_depend>launch</exec_depend>
   <exec_depend>moma_description</exec_depend>
   <exec_depend>omron_amr_simulation</exec_depend>
+  <exec_depend>position_controllers</exec_depend>
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
   <exec_depend>tm_description</exec_depend>
   <export><build_type>ament_cmake</build_type></export>
 </package>
