@@ -2,7 +2,10 @@ import importlib.util
 from pathlib import Path
 import xml.etree.ElementTree as ET
 
+from ament_index_python.packages import get_package_share_directory
+from launch import LaunchContext
 import pytest
+import yaml
 
 
 PACKAGE = Path(__file__).resolve().parents[1]
@@ -31,3 +34,33 @@ def test_wrist_camera_uses_existing_mount_and_optical_frame():
 def test_wrist_camera_requires_camera_link():
     with pytest.raises(ValueError, match='camera_link'):
         preview.add_wrist_camera(ET.fromstring('<robot name="test"/>'))
+
+
+@pytest.mark.parametrize('fixed', [True, False])
+def test_gripper_control_configuration(monkeypatch, fixed):
+    monkeypatch.setattr(preview, 'Node', lambda **kwargs: kwargs)
+    context = LaunchContext()
+    context.launch_configurations.update({
+        'gripper': 'soft_two_fingers', 'world': 'empty',
+        'fixed_base_control': str(fixed).lower(), 'mobile_base_control': str(not fixed).lower(),
+        'lidar': 'false', 'camera': 'false', 'docking': 'false',
+    })
+    nodes = preview.create_preview(context)
+    assert dict(nodes[1].launch_arguments)['physics_engine'] == ('bullet' if fixed else 'dart')
+    publisher = next(node for node in nodes if isinstance(node, dict) and node['executable'] == 'robot_state_publisher')
+    root = ET.fromstring(publisher['parameters'][0]['robot_description'])
+    mimic = root.find("joint[@name='gripper_planar_4']/mimic")
+    if fixed:
+        assert mimic.get('joint') == 'gripper_planar_5'
+    else:
+        assert mimic is None
+    joint = root.find("ros2_control/joint[@name='gripper_planar_4']")
+    assert (joint.find('command_interface') is None) == fixed
+    assert joint.find("state_interface[@name='position']") is not None
+    gripper_dir = Path(get_package_share_directory('gripper_gazebo')) / 'soft-two-finger-gripper'
+    with (gripper_dir / ('gripper_coupled.yaml' if fixed else 'gripper_controllers.yaml')).open() as config_file:
+        config = yaml.safe_load(config_file)
+    assert config['gripper_position_controller']['ros__parameters']['joints'] == (
+        ['gripper_planar_5'] if fixed else ['gripper_planar_4', 'gripper_planar_5'])
+    adapter = next(node for node in nodes if isinstance(node, dict) and node['executable'] == 'sim_gripper_action.py')
+    assert adapter['package'] == 'gripper_gazebo'

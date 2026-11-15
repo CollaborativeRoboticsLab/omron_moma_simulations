@@ -1,7 +1,8 @@
 # Simulation To Do
 
-- [ ] Fix the stuck `gripper_planar_4` finger and validate repeated opening,
-	closing, object contact, and lifting. Grasping is currently unreliable.
+- [ ] Fix the stuck `gripper_planar_4` finger in mobile mode without breaking
+	base motion. Validate gripper contact and lifting; repeated unloaded opening
+	and closing work in fixed-base mode, but grasping remains unverified.
 - [ ] Fix the mobile-manipulator task server's feasibility-backend timeout and
 	validate coordinated arm and base tasks; the backend currently accepts
 	`arm_only_ik` and `arm_only_plan`, not `mobile_manipulator`.

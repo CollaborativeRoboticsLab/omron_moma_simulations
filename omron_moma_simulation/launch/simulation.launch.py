@@ -106,9 +106,13 @@ def create_preview(context):
         for plugin in gazebo.findall('plugin'):
             if plugin.get('filename') == 'libgazebo_ros_control.so':
                 gazebo.remove(plugin)
-    gripper_joints = ('gripper_planar_4', 'gripper_planar_5')
+    gripper_share = get_package_share_directory('gripper_gazebo')
+    gripper_dir = os.path.join(gripper_share, 'soft-two-finger-gripper')
+    spec = importlib.util.spec_from_file_location('gripper_model', os.path.join(gripper_dir, 'model.py'))
+    gripper_model = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(gripper_model)
     available_joints = {joint.get('name') for joint in root.findall('joint')}
-    has_gripper_joints = all(name in available_joints for name in gripper_joints)
+    has_gripper_joints = all(name in available_joints for name in gripper_model.JOINTS)
     if mobile_base_control or lidar:
         spec = importlib.util.spec_from_file_location('base_drive', os.path.join(
             get_package_share_directory('omron_amr_simulation'), 'launch', 'base_drive.py'))
@@ -124,19 +128,21 @@ def create_preview(context):
             base_drive.add_drive_geometry(root, body_name='ld250_main_body')
         control = ET.SubElement(root, 'ros2_control', {'name': 'GazeboSimSystem', 'type': 'system'})
         ET.SubElement(ET.SubElement(control, 'hardware'), 'plugin').text = 'gz_ros2_control/GazeboSimSystem'
-        joints = [f'joint_{number}' for number in range(1, 7)]
-        joints.extend(name for name in gripper_joints if name in available_joints)
-        for name in joints:
+        for name in [f'joint_{number}' for number in range(1, 7)]:
             joint = ET.SubElement(control, 'joint', {'name': name})
             ET.SubElement(joint, 'command_interface', {'name': 'position'})
             ET.SubElement(joint, 'state_interface', {'name': 'position'})
             ET.SubElement(joint, 'state_interface', {'name': 'velocity'})
+        if has_gripper_joints:
+            gripper_model.configure(root, control, coupled=True)
         plugin = ET.SubElement(ET.SubElement(root, 'gazebo'), 'plugin', {
             'filename': 'libgz_ros2_control-system.so',
             'name': 'gz_ros2_control::GazeboSimROS2ControlPlugin',
         })
         ET.SubElement(plugin, 'parameters').text = os.path.join(
             get_package_share_directory('omron_moma_simulation'), 'config', 'gazebo_controllers.yaml')
+        if has_gripper_joints:
+            ET.SubElement(plugin, 'parameters').text = os.path.join(gripper_dir, 'gripper_controllers.yaml')
     else:
         ET.SubElement(ET.SubElement(root, 'gazebo'), 'static').text = 'true'
     if lidar:
@@ -163,6 +169,7 @@ def create_preview(context):
         PythonLaunchDescriptionSource(preview),
         launch_arguments={
             'world_only': 'true',
+            'physics_engine': 'bullet' if has_gripper_joints and (fixed_base_control or mobile_base_control) else 'dart',
             'gui': LaunchConfiguration('gui'),
             'world': LaunchConfiguration('world'),
             'lidar': LaunchConfiguration('lidar'),
@@ -190,9 +197,13 @@ def create_preview(context):
             nodes.append(Node(package='controller_manager', executable='spawner',
                               arguments=arguments, output='screen'))
         if has_gripper_joints:
+            arguments = ['gripper_position_controller', '--controller-manager-timeout', '120',
+                         '--switch-timeout', '60']
+            if has_gripper_joints:
+                arguments.extend(['--param-file', os.path.join(
+                    gripper_dir, 'gripper_coupled.yaml')])
             nodes.append(Node(package='controller_manager', executable='spawner',
-                              arguments=['gripper_position_controller', '--controller-manager-timeout', '120',
-                                         '--switch-timeout', '60'], output='screen'))
+                              arguments=arguments, output='screen'))
     else:
         nodes.append(Node(package='joint_state_publisher', executable='joint_state_publisher',
                           parameters=[{'use_sim_time': True}], output='screen'))
@@ -216,8 +227,9 @@ def create_preview(context):
         nodes.extend(base_drive.docking_nodes('ld250_tm12x', dock_x, dock_y, dock_yaw))
     if gripper == 'soft_two_fingers' and (fixed_base_control or mobile_base_control):
         gripper_config = os.path.join(get_package_share_directory('gripper_ros'), 'config', 'grippers', 'soft_two_finger_dynamixel.yaml')
-        nodes.append(Node(package='omron_moma_simulation', executable='sim_gripper_action.py',
-                          name='gripper_two_fingers_node', parameters=[gripper_config, {'use_sim_time': True}], output='screen'))
+        nodes.append(Node(package='gripper_gazebo', executable='sim_gripper_action.py',
+                          name='gripper_two_fingers_node', parameters=[gripper_config, {
+                              'use_sim_time': True, 'coupled_gripper': True}], output='screen'))
     return nodes
 
 

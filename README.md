@@ -92,10 +92,12 @@ the single authoritative source; do not run the fake TM driver or hardware
 drivers against the same joints.
 
 For `soft_two_fingers`, the simulation also exposes `/gripper_command`. It only
-accepts position goals with `max_effort: 0`. One simulated finger currently
-remains at its limit, so nonzero-width commands can abort and grasping is not
-yet supported. Arm and gripper inertias, collision geometry, controller limits,
-and contact behavior still need validation before relying on physical results.
+accepts position goals with `max_effort: 0`. Fixed-base control uses a single
+actuated slider and a mimic joint with the Bullet Featherstone physics backend.
+The simulated gripper model and action adapter are provided by `gripper_gazebo`.
+Repeated open and close goals succeeded without an object. Arm and gripper
+inertias, collision geometry, controller limits, contact, and grasping still need
+validation before relying on physical results.
 
 ## Experimental mobile-base control
 
@@ -108,8 +110,9 @@ and `odom -> base_link` interfaces. It cannot be combined with
 `fixed_base_control:=true`. The default static preview and fixed-base mode remain
 unchanged. See the AMR simulation README for command limits, timeout behavior,
 approximate wheel geometry and safety limitations. Arm and base commands have
-been tested separately, not as coordinated mobile manipulation. The soft gripper
-limitation above also applies to this mode.
+been tested separately, not as coordinated mobile manipulation. Mobile mode uses
+DART to preserve base motion; one soft-gripper finger can still stick in this
+mode and nonzero-width goals can abort.
 
 To enable both LD250 lidar scans and the simulated dock:
 
