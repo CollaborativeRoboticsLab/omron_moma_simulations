@@ -9,7 +9,7 @@ An experimental mobile-base mode combines the drive simulation with arm control.
 ## Build
 
 With `omron_amr_simulation`, `omron_amr`, `omron_moma`, `tmr_ros2`,
-`grasping_omron_moma`, `grasping`, and `grippers` in the workspace and their ROS
+`grasping_omron_moma`, `grasping`, `grippers`, and `mobile_manipulator` in the workspace and their ROS
 dependencies installed:
 
 ```bash
@@ -23,14 +23,14 @@ colcon build --packages-up-to omron_moma_simulation
 
 ```bash
 source install/setup.bash
-ros2 launch omron_moma_simulation preview.launch.py
+ros2 launch omron_moma_simulation simulation.launch.py
 ```
 
 The `gripper` argument selects the tool configuration:
 
 ```bash
 source install/setup.bash
-ros2 launch omron_moma_simulation preview.launch.py gripper:=soft_two_fingers
+ros2 launch omron_moma_simulation simulation.launch.py gripper:=soft_two_fingers
 ```
 
 The default is `gripper:=none`. The soft two-finger configuration reuses the
@@ -40,7 +40,7 @@ To preview the MoMa in the Gazebo Fuel warehouse instead of the default empty
 world:
 
 ```bash
-ros2 launch omron_moma_simulation preview.launch.py gripper:=soft_two_fingers world:=warehouse
+ros2 launch omron_moma_simulation simulation.launch.py gripper:=soft_two_fingers world:=warehouse
 ```
 
 The warehouse layout is local; the first launch downloads its models from Gazebo
@@ -53,7 +53,7 @@ README for object details and world attribution.
 For a separate grasp-testing world with five tables and dynamic objects:
 
 ```bash
-ros2 launch omron_moma_simulation preview.launch.py gripper:=soft_two_fingers world:=grasp_test
+ros2 launch omron_moma_simulation simulation.launch.py gripper:=soft_two_fingers world:=grasp_test
 ```
 
 Each table holds a cube, cylinder, sphere, block, and bottle. Set
@@ -81,7 +81,7 @@ model and interface assessment.
 ## Experimental fixed-base control
 
 ```bash
-ros2 launch omron_moma_simulation preview.launch.py world:=grasp_test gripper:=soft_two_fingers fixed_base_control:=true
+ros2 launch omron_moma_simulation simulation.launch.py world:=grasp_test gripper:=soft_two_fingers fixed_base_control:=true
 ```
 
 This mode anchors the base and starts `gz_ros2_control`, a joint-state
@@ -100,7 +100,7 @@ and contact behavior still need validation before relying on physical results.
 ## Experimental mobile-base control
 
 ```bash
-ros2 launch omron_moma_simulation preview.launch.py mobile_base_control:=true
+ros2 launch omron_moma_simulation simulation.launch.py mobile_base_control:=true
 ```
 
 This starts the arm controller and the AMR simulation's `cmd_vel`, `stop`, `odom`
@@ -108,14 +108,13 @@ and `odom -> base_link` interfaces. It cannot be combined with
 `fixed_base_control:=true`. The default static preview and fixed-base mode remain
 unchanged. See the AMR simulation README for command limits, timeout behavior,
 approximate wheel geometry and safety limitations. Arm and base commands have
-been tested separately, not as coordinated mobile manipulation. Sensors, Nav2
-and MoveIt integration remain untested, and the soft gripper limitation above
-also applies to this mode.
+been tested separately, not as coordinated mobile manipulation. The soft gripper
+limitation above also applies to this mode.
 
 To enable both LD250 lidar scans and the simulated dock:
 
 ```bash
-ros2 launch omron_moma_simulation preview.launch.py mobile_base_control:=true gripper:=soft_two_fingers lidar:=true docking:=true
+ros2 launch omron_moma_simulation simulation.launch.py mobile_base_control:=true gripper:=soft_two_fingers lidar:=true docking:=true
 ```
 
 The simulated dock provides `/undock_robot` and a limited `/dock_robot` action.
@@ -126,7 +125,7 @@ safety interlocks are not.
 ## Experimental wrist camera
 
 ```bash
-ros2 launch omron_moma_simulation preview.launch.py gripper:=soft_two_fingers fixed_base_control:=true camera:=true world:=grasp_test
+ros2 launch omron_moma_simulation simulation.launch.py gripper:=soft_two_fingers fixed_base_control:=true camera:=true world:=grasp_test
 ```
 
 `camera:=true` also works with `mobile_base_control:=true` and may be combined
@@ -148,6 +147,32 @@ and realistic noise are not simulated. Gazebo's rendering system must
 work in the environment, including for headless use. Do not start the physical
 camera driver on the same topics when using the simulation.
 
+## Experimental MoveIt and mobile manipulation
+
+```bash
+ros2 launch omron_moma_simulation moveit.launch.py gui:=false
+ros2 launch omron_moma_simulation mobile_manipulator.launch.py gui:=false
+```
+
+Run these commands separately. The first starts a fixed-base simulation and
+MoveIt; use `mobile:=true` for a mobile base, or `gripper:=none` for the bare
+arm. Use `start_sim:=false` only with a matching simulator already running.
+The second starts the mobile robot, lidar, SLAM, Nav2, MoveIt, scene manager,
+arm motion and mobile-manipulator task services. It defaults to the warehouse;
+`world`, `gui`, `camera`, `docking`, and config-file arguments can be changed.
+It does not start physical drivers or automatically send a task. The optional
+`run_task_client:=true` starts the existing configured test client, which may
+command motion; `task_mode` defaults to `arm_only_ik`.
+
+An arm joint target was planned and executed through MoveIt in simulation.
+Coordinated mobile manipulation is not yet functional: the existing task server
+can time out while waiting for its Cartesian feasibility backend. The backend
+accepts `arm_only_ik` and `arm_only_plan`, not `mobile_manipulator`. Short Nav2
+goals succeeded for the simulated AMR; see the AMR simulation README for lidar
+and SLAM limitations. The MoveIt planning scene does not automatically
+represent Gazebo world objects. The simulated gripper is not yet reliable for
+grasping, and none of these interfaces are a hardware safety system.
+
 ## Arm simulation viability
 
 `tm_use_simulation:=true` in the existing TM bringup selects the driver's fake
@@ -159,8 +184,8 @@ driver's simulation behavior differs, so check the built driver configuration.
 
 The combined Xacro includes `libgazebo_ros_control.so`, a ROS 1 Gazebo Classic
 plugin, and legacy transmissions. The simulation launch removes the plugin and
-uses Jazzy-compatible `gz_ros2_control` in the controlled modes. MoveIt, Nav2
-and coordinated mobile manipulation remain untested.
+uses Jazzy-compatible `gz_ros2_control` in the controlled modes. Coordinated
+mobile manipulation remains unvalidated.
 
 The package maintainer field is a placeholder to be decided before publishing the
 repository.

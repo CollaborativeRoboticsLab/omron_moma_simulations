@@ -9,6 +9,7 @@ install(PROGRAMS scripts/sim_gripper_action.py DESTINATION lib/${PROJECT_NAME})
 if(BUILD_TESTING)
 	find_package(ament_cmake_pytest REQUIRED)
 	ament_add_pytest_test(test_wrist_camera test/test_wrist_camera.py)
+	ament_add_pytest_test(test_moveit_launch test/test_moveit_launch.py)
 endif()
 
 ament_package()

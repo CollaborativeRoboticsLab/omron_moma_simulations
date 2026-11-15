@@ -6,7 +6,7 @@ import pytest
 
 
 PACKAGE = Path(__file__).resolve().parents[1]
-SPEC = importlib.util.spec_from_file_location('preview', PACKAGE / 'launch' / 'preview.launch.py')
+SPEC = importlib.util.spec_from_file_location('preview', PACKAGE / 'launch' / 'simulation.launch.py')
 preview = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(preview)
 

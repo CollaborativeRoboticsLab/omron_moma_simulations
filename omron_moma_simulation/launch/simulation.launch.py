@@ -68,7 +68,7 @@ def add_wrist_camera(root):
 
 def create_preview(context):
     preview = os.path.join(
-        get_package_share_directory('omron_amr_simulation'), 'launch', 'preview.launch.py')
+        get_package_share_directory('omron_amr_simulation'), 'launch', 'simulation.launch.py')
     gripper = LaunchConfiguration('gripper').perform(context)
     descriptions = {
         'none': ('moma_description', 'xacro/ld250_tm12x.urdf.xacro'),
@@ -186,11 +186,13 @@ def create_preview(context):
     ]
     if fixed_base_control or mobile_base_control:
         for controller in ('joint_state_broadcaster', 'tmr_arm_with_base_controller'):
+            arguments = [controller, '--controller-manager-timeout', '120', '--switch-timeout', '60']
             nodes.append(Node(package='controller_manager', executable='spawner',
-                              arguments=[controller, '--controller-manager-timeout', '120'], output='screen'))
+                              arguments=arguments, output='screen'))
         if has_gripper_joints:
             nodes.append(Node(package='controller_manager', executable='spawner',
-                              arguments=['gripper_position_controller', '--controller-manager-timeout', '120'], output='screen'))
+                              arguments=['gripper_position_controller', '--controller-manager-timeout', '120',
+                                         '--switch-timeout', '60'], output='screen'))
     else:
         nodes.append(Node(package='joint_state_publisher', executable='joint_state_publisher',
                           parameters=[{'use_sim_time': True}], output='screen'))
