@@ -49,6 +49,10 @@ def test_gripper_control_configuration(monkeypatch, fixed):
     assert dict(nodes[1].launch_arguments)['physics_engine'] == ('bullet' if fixed else 'dart')
     publisher = next(node for node in nodes if isinstance(node, dict) and node['executable'] == 'robot_state_publisher')
     root = ET.fromstring(publisher['parameters'][0]['robot_description'])
+    for name in ('gripper_planar_4', 'gripper_planar_5'):
+        limit = root.find(f"joint[@name='{name}']/limit")
+        assert float(limit.get('lower')) == pytest.approx(-0.045 if fixed else -0.046)
+        assert float(limit.get('upper')) == pytest.approx(0.0 if fixed else 0.001)
     mimic = root.find("joint[@name='gripper_planar_4']/mimic")
     if fixed:
         assert mimic.get('joint') == 'gripper_planar_5'

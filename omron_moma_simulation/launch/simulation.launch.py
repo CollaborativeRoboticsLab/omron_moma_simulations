@@ -134,7 +134,8 @@ def create_preview(context):
             ET.SubElement(joint, 'state_interface', {'name': 'position'})
             ET.SubElement(joint, 'state_interface', {'name': 'velocity'})
         if has_gripper_joints:
-            gripper_model.configure(root, control, coupled=True)
+            gripper_model.configure(root, control, coupled=fixed_base_control,
+                                    limit_margin=0.001 if mobile_base_control else 0.0)
         plugin = ET.SubElement(ET.SubElement(root, 'gazebo'), 'plugin', {
             'filename': 'libgz_ros2_control-system.so',
             'name': 'gz_ros2_control::GazeboSimROS2ControlPlugin',
@@ -169,7 +170,7 @@ def create_preview(context):
         PythonLaunchDescriptionSource(preview),
         launch_arguments={
             'world_only': 'true',
-            'physics_engine': 'bullet' if has_gripper_joints and (fixed_base_control or mobile_base_control) else 'dart',
+            'physics_engine': 'bullet' if has_gripper_joints and fixed_base_control else 'dart',
             'gui': LaunchConfiguration('gui'),
             'world': LaunchConfiguration('world'),
             'lidar': LaunchConfiguration('lidar'),
@@ -199,7 +200,7 @@ def create_preview(context):
         if has_gripper_joints:
             arguments = ['gripper_position_controller', '--controller-manager-timeout', '120',
                          '--switch-timeout', '60']
-            if has_gripper_joints:
+            if fixed_base_control:
                 arguments.extend(['--param-file', os.path.join(
                     gripper_dir, 'gripper_coupled.yaml')])
             nodes.append(Node(package='controller_manager', executable='spawner',
@@ -229,7 +230,7 @@ def create_preview(context):
         gripper_config = os.path.join(get_package_share_directory('gripper_ros'), 'config', 'grippers', 'soft_two_finger_dynamixel.yaml')
         nodes.append(Node(package='gripper_gazebo', executable='sim_gripper_action.py',
                           name='gripper_two_fingers_node', parameters=[gripper_config, {
-                              'use_sim_time': True, 'coupled_gripper': True}], output='screen'))
+                              'use_sim_time': True, 'coupled_gripper': fixed_base_control}], output='screen'))
     return nodes
 
 

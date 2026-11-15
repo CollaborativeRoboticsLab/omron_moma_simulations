@@ -111,8 +111,10 @@ and `odom -> base_link` interfaces. It cannot be combined with
 unchanged. See the AMR simulation README for command limits, timeout behavior,
 approximate wheel geometry and safety limitations. Arm and base commands have
 been tested separately, not as coordinated mobile manipulation. Mobile mode uses
-DART to preserve base motion; one soft-gripper finger can still stick in this
-mode and nonzero-width goals can abort.
+DART and independently controlled finger joints. A 1 mm simulated joint-limit
+margin avoids a sticking finger; direct joint commands can exceed the nominal
+physical limits. Unloaded opening and closing have been tested before and after
+driving, but object contact and lifting remain unverified.
 
 To enable both LD250 lidar scans and the simulated dock:
 
