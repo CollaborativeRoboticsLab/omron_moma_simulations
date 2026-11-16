@@ -22,8 +22,12 @@
 - [x] Add automated tests for each gripper's description, launch selection,
 	controller interfaces, and MoveIt configuration, including regression tests
 	for the existing soft two-finger and no-gripper modes.
-- [ ] Validate opening and closing or vacuum activation and release, object
-	contact, grasping and lifting in fixed and mobile modes for each gripper.
+- [x] Validate fixed-base unloaded opening and closing for the soft two-finger,
+	RG2, and RG6 grippers; verify VGC10 fixed-base startup, no-contact suction
+	rejection, and release.
+- [ ] Validate object contact, successful grasp or attachment, and lifting in
+	fixed and mobile modes for each gripper. VGC10 attachment and lifting remain
+	unverified because the measured tool pose did not match the IK target.
 - [x] Update build and launch documentation with per-gripper examples,
 	dependencies, supported modes, and known simulation limitations.
 
