@@ -54,7 +54,7 @@ class Vgc10Simulator(Node):
         ]
         self.attached_target = None
         self.action_server = ActionServer(
-            self, VGCommand, 'onrobot_vg/command', self._execute, goal_callback=self._goal)
+            self, VGCommand, 'gripper_command', self._execute, goal_callback=self._goal)
 
     def _state_callback(self, model):
         def update(message):
