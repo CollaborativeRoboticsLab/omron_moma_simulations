@@ -1,15 +1,15 @@
 <?xml version="1.0"?>
 <package format="3">
-  <name>omron_moma_simulation</name>
+  <name>omron_moma_custom</name>
   <version>0.1.0</version>
   <description>Gazebo Sim environments for Omron mobile manipulators.</description>
   <maintainer email="maintainer@example.com">Maintainer</maintainer>
   <license>MIT</license>
   <buildtool_depend>ament_cmake</buildtool_depend>
   <exec_depend>ament_index_python</exec_depend>
-  <exec_depend>grasping_description_omron_moma</exec_depend>
+  <exec_depend>grasping_description_custom_omron_moma</exec_depend>
   <exec_depend>grasping_control</exec_depend>
-  <exec_depend>grasping_omron_moma</exec_depend>
+  <exec_depend>grasping_custom_omron_moma</exec_depend>
   <exec_depend>controller_manager</exec_depend>
   <exec_depend>control_msgs</exec_depend>
   <exec_depend>gripper_ros</exec_depend>

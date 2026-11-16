@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>omron_moma_onrobot</name>
+  <version>0.1.0</version>
+  <description>Gazebo Sim environments for Omron mobile manipulators.</description>
+  <maintainer email="maintainer@example.com">Maintainer</maintainer>
+  <license>MIT</license>
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <exec_depend>ament_index_python</exec_depend>
+  <exec_depend>grasping_description_onrobot_omron_moma</exec_depend>
+  <exec_depend>grasping_control</exec_depend>
+  <exec_depend>grasping_onrobot_omron_moma</exec_depend>
+  <exec_depend>controller_manager</exec_depend>
+  <exec_depend>control_msgs</exec_depend>
+  <exec_depend>gz_ros2_control</exec_depend>
+  <exec_depend>joint_state_broadcaster</exec_depend>
+  <exec_depend>joint_trajectory_controller</exec_depend>
+  <exec_depend>launch</exec_depend>
+  <exec_depend>launch_ros</exec_depend>
+  <exec_depend>ld250_tm12x_moveit_config</exec_depend>
+  <exec_depend>ld250_tm12x_onrobot_moveit_config</exec_depend>
+  <exec_depend>ld250_tm12x_rg2_moveit_config</exec_depend>
+  <exec_depend>ld250_tm12x_rg6_moveit_config</exec_depend>
+  <exec_depend>ld250_tm12x_vgc10_moveit_config</exec_depend>
+  <exec_depend>moma_description</exec_depend>
+  <exec_depend>moveit_configs_utils</exec_depend>
+  <exec_depend>moveit_ros_move_group</exec_depend>
+  <exec_depend>omron_amr_simulation</exec_depend>
+  <exec_depend>onrobot_control</exec_depend>
+  <exec_depend>onrobot_msgs</exec_depend>
+  <exec_depend>onrobot_rg_description</exec_depend>
+  <exec_depend>onrobot_vg_description</exec_depend>
+  <exec_depend>position_controllers</exec_depend>
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>ros_gz_bridge</exec_depend>
+  <exec_depend>ros_gz_interfaces</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>tm_description</exec_depend>
+  <exec_depend>tm12x_moveit_config</exec_depend>
+  <exec_depend>robot_state_publisher</exec_depend>
+  <test_depend>ament_cmake_pytest</test_depend>
+  <export><build_type>ament_cmake</build_type></export>
+</package>

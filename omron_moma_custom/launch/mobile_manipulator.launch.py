@@ -15,8 +15,8 @@ def include(package, filename, arguments):
 
 
 def generate_launch_description():
-    simulation_share = get_package_share_directory('omron_moma_simulation')
-    grasping_share = get_package_share_directory('grasping_omron_moma')
+    simulation_share = get_package_share_directory('omron_moma_custom')
+    grasping_share = get_package_share_directory('grasping_custom_omron_moma')
     return LaunchDescription([
         DeclareLaunchArgument('gui', default_value='true'),
         DeclareLaunchArgument('world', default_value='warehouse'),
@@ -29,13 +29,13 @@ def generate_launch_description():
         DeclareLaunchArgument('task_client_config_file', default_value=os.path.join(grasping_share, 'config', 'mobile_manipulator_control.yaml')),
         GroupAction(actions=[
             SetParameter(name='use_sim_time', value=True),
-            include('omron_moma_simulation', 'simulation.launch.py', {
+            include('omron_moma_custom', 'simulation.launch.py', {
                 'mobile_base_control': 'true', 'lidar': 'true', 'gripper': 'soft_two_fingers',
                 'gui': LaunchConfiguration('gui'), 'world': LaunchConfiguration('world'),
                 'camera': LaunchConfiguration('camera'), 'docking': LaunchConfiguration('docking'),
             }),
             include('omron_amr_simulation', 'nav2.launch.py', {'start_sim': 'false'}),
-            include('omron_moma_simulation', 'moveit.launch.py', {
+            include('omron_moma_custom', 'moveit.launch.py', {
                 'start_sim': 'false', 'gripper': 'soft_two_fingers',
             }),
             include('grasping_control', 'motion_execution.launch.py', {
@@ -43,7 +43,7 @@ def generate_launch_description():
                 'startup_activate_default_scene': 'false',
                 'launch_feasiblity_service': 'true',
             }),
-            include('grasping_omron_moma', 'task_feasibility.launch.py', {
+            include('grasping_custom_omron_moma', 'task_feasibility.launch.py', {
                 'config_file': LaunchConfiguration('task_config_file'),
             }),
             Node(package='mobile_manipulator_control', executable='mobile_manipulator_control_node',

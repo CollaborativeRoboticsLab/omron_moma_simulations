@@ -67,7 +67,7 @@ def create_moveit(context):
 
 
 def generate_launch_description():
-    share = get_package_share_directory('omron_moma_simulation')
+    share = get_package_share_directory('omron_moma_custom')
     return LaunchDescription([
         DeclareLaunchArgument('start_sim', default_value='true'),
         DeclareLaunchArgument('mobile', default_value='false'),

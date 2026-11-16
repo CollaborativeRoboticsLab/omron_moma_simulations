@@ -1,36 +1,37 @@
-# Omron MoMa Gazebo simulation
+# Omron MoMa Gazebo simulations
 
-ROS 2 Jazzy / Gazebo Harmonic starting point for the TM12x on the LD250. This
-package reuses the AMR simulation worlds and the existing combined
-`moma_description` Xacro. The default launch is a **static geometry preview**.
-An experimental fixed-base arm simulation is available separately.
-An experimental mobile-base mode combines the drive simulation with arm control.
+ROS 2 Jazzy / Gazebo Harmonic simulations for the TM12x on the LD250. The
+workspace is split into `omron_moma_custom` for the soft two-finger gripper and
+`omron_moma_onrobot` for OnRobot RG2, RG6, and VGC10 tools. Both reuse the AMR
+simulation worlds and the combined MoMa description. Static previews and
+experimental fixed-base and mobile-base modes are available.
 
 ## Build
 
-With `omron_amr_simulation`, `omron_amr`, `omron_moma`, `tmr_ros2`,
-`grasping_omron_moma`, `grasping`, `grippers`, and `mobile_manipulator` in the workspace and their ROS
-dependencies installed:
+With `omron_amr_simulation`, `omron_amr`, `omron_moma`, `tmr_ros2`, both
+`grasping_omron_moma_custom` and `grasping_omron_moma_onrobot`, `grasping`,
+`grippers`, `onrobot_grippers`, and `mobile_manipulator` in the workspace and
+their ROS dependencies installed:
 
 ```bash
 cd ~/colcon_ws
 source /opt/ros/jazzy/setup.bash
 rosdep install --from-paths src --ignore-src -r -y
-colcon build --packages-up-to omron_moma_simulation
+colcon build --packages-up-to omron_moma_custom omron_moma_onrobot
 ```
 
 ## Run
 
 ```bash
 source install/setup.bash
-ros2 launch omron_moma_simulation simulation.launch.py
+ros2 launch omron_moma_custom simulation.launch.py
 ```
 
 The `gripper` argument selects the tool configuration:
 
 ```bash
 source install/setup.bash
-ros2 launch omron_moma_simulation simulation.launch.py gripper:=soft_two_fingers
+ros2 launch omron_moma_custom simulation.launch.py gripper:=soft_two_fingers
 ```
 
 The default is `gripper:=none`. The soft two-finger configuration reuses the
@@ -40,7 +41,7 @@ To preview the MoMa in the Gazebo Fuel warehouse instead of the default empty
 world:
 
 ```bash
-ros2 launch omron_moma_simulation simulation.launch.py gripper:=soft_two_fingers world:=warehouse
+ros2 launch omron_moma_custom simulation.launch.py gripper:=soft_two_fingers world:=warehouse
 ```
 
 The warehouse layout is local; the first launch downloads its models from Gazebo
@@ -53,7 +54,7 @@ README for object details and world attribution.
 For a separate grasp-testing world with five tables and dynamic objects:
 
 ```bash
-ros2 launch omron_moma_simulation simulation.launch.py gripper:=soft_two_fingers world:=grasp_test
+ros2 launch omron_moma_custom simulation.launch.py gripper:=soft_two_fingers world:=grasp_test
 ```
 
 Each table holds a cube, cylinder, sphere, block, and bottle. Set
@@ -66,7 +67,33 @@ Following are the supported gripper configurations and their corresponding descr
 | Gripper Configuration | Description | External Package Dependencies |
 |---------------------|-------------|-------------------------------|
 | none                | No gripper attached | None |
-| soft_two_fingers    | Soft two-finger gripper with tool mount and camera | `grasping_omron_moma`, `grasping`, `grippers` |
+| soft_two_fingers    | Soft two-finger gripper with tool mount and camera | `grasping_omron_moma_custom`, `grasping`, `grippers` |
+
+## OnRobot simulation
+
+The separate `omron_moma_onrobot` package supports `none`, `rg2`, `rg6`, and
+`vgc10`. RG2 and RG6 use the OnRobot Gazebo descriptions, position controller,
+and simulated `GripperCommand` action server. VGC10 uses contact sensors and
+Gazebo detachable joints to model grasping and release for objects included in
+the `grasp_test` and `warehouse` worlds. This approximates vacuum grasping; it
+does not model vacuum pressure, seal quality, payload limits, or leaks.
+
+```bash
+ros2 launch omron_moma_onrobot simulation.launch.py gripper:=rg2 fixed_base_control:=true
+ros2 launch omron_moma_onrobot simulation.launch.py gripper:=rg6 mobile_base_control:=true
+ros2 launch omron_moma_onrobot simulation.launch.py gripper:=vgc10 fixed_base_control:=true world:=grasp_test
+ros2 launch omron_moma_onrobot moveit.launch.py gripper:=vgc10
+```
+
+The RG action servers are available at `/onrobot_rg2/gripper_command` or
+`/onrobot_rg6/gripper_command`. VGC10 exposes `/onrobot_vg/command` using
+`onrobot_msgs/action/VGCommand`; suction goals are rejected unless a supported
+world object is currently touching a VGC10 cup. Object attachment is an
+experimental fixed-joint approximation, not a calibrated suction model.
+Do not run the physical OnRobot drivers against these simulated action topics.
+OnRobot mobile bringup is available with
+`ros2 launch omron_moma_onrobot mobile_manipulator.launch.py gripper:=rg2`; it
+does not currently start the custom package's mobile-manipulator task server.
 
 
 In the default static preview, the gripper and camera do not simulate actuation
@@ -81,7 +108,7 @@ model and interface assessment.
 ## Experimental fixed-base control
 
 ```bash
-ros2 launch omron_moma_simulation simulation.launch.py world:=grasp_test gripper:=soft_two_fingers fixed_base_control:=true
+ros2 launch omron_moma_custom simulation.launch.py world:=grasp_test gripper:=soft_two_fingers fixed_base_control:=true
 ```
 
 This mode anchors the base and starts `gz_ros2_control`, a joint-state
@@ -102,7 +129,7 @@ validation before relying on physical results.
 ## Experimental mobile-base control
 
 ```bash
-ros2 launch omron_moma_simulation simulation.launch.py mobile_base_control:=true
+ros2 launch omron_moma_custom simulation.launch.py mobile_base_control:=true
 ```
 
 This starts the arm controller and the AMR simulation's `cmd_vel`, `stop`, `odom`
@@ -119,7 +146,7 @@ driving, but object contact and lifting remain unverified.
 To enable both LD250 lidar scans and the simulated dock:
 
 ```bash
-ros2 launch omron_moma_simulation simulation.launch.py mobile_base_control:=true gripper:=soft_two_fingers lidar:=true docking:=true
+ros2 launch omron_moma_custom simulation.launch.py mobile_base_control:=true gripper:=soft_two_fingers lidar:=true docking:=true
 ```
 
 The simulated dock provides `/undock_robot` and a limited `/dock_robot` action.
@@ -130,7 +157,7 @@ safety interlocks are not.
 ## Experimental wrist camera
 
 ```bash
-ros2 launch omron_moma_simulation simulation.launch.py gripper:=soft_two_fingers fixed_base_control:=true camera:=true world:=grasp_test
+ros2 launch omron_moma_custom simulation.launch.py gripper:=soft_two_fingers fixed_base_control:=true camera:=true world:=grasp_test
 ```
 
 `camera:=true` also works with `mobile_base_control:=true` and may be combined
@@ -155,8 +182,8 @@ camera driver on the same topics when using the simulation.
 ## Experimental MoveIt and mobile manipulation
 
 ```bash
-ros2 launch omron_moma_simulation moveit.launch.py gui:=false
-ros2 launch omron_moma_simulation mobile_manipulator.launch.py gui:=false
+ros2 launch omron_moma_custom moveit.launch.py gui:=false
+ros2 launch omron_moma_custom mobile_manipulator.launch.py gui:=false
 ```
 
 Run these commands separately. The first starts a fixed-base simulation and
