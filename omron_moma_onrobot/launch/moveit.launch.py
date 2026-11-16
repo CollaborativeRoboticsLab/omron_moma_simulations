@@ -80,8 +80,18 @@ def create_moveit(context):
     mappings = {name: LaunchConfiguration(name).perform(context) for name in
                 ('mount_xyz', 'mount_rpy', 'tcp_xyz', 'tcp_rpy')}
     parameters = build_moveit_parameters(gripper, mappings)
-    return [Node(package='moveit_ros_move_group', executable='move_group',
-                 output='screen', parameters=[parameters])]
+    rviz_parameters = {name: parameters[name] for name in
+                       ('robot_description', 'robot_description_semantic',
+                        'robot_description_kinematics', 'planning_pipelines', 'use_sim_time')}
+    rviz_config = os.path.join(get_package_share_directory('ld250_tm12x_onrobot_moveit_config'),
+                               'config', 'moveit.rviz')
+    return [
+        Node(package='moveit_ros_move_group', executable='move_group',
+             output='screen', parameters=[parameters]),
+        Node(package='rviz2', executable='rviz2', name='rviz2', output='screen',
+             arguments=['-d', rviz_config], parameters=[rviz_parameters],
+             condition=IfCondition(LaunchConfiguration('rviz'))),
+    ]
 
 
 def generate_launch_description():
@@ -97,6 +107,7 @@ def generate_launch_description():
         DeclareLaunchArgument('mount_rpy', default_value='0 0 0'),
         DeclareLaunchArgument('tcp_xyz', default_value='0 0 0'),
         DeclareLaunchArgument('tcp_rpy', default_value='0 0 0'),
+        DeclareLaunchArgument('rviz', default_value='true'),
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(os.path.join(share, 'launch', 'simulation.launch.py')),
             condition=IfCondition(LaunchConfiguration('start_sim')),

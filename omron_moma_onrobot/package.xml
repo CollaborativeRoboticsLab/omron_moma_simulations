@@ -25,6 +25,7 @@
   <exec_depend>moma_description</exec_depend>
   <exec_depend>moveit_configs_utils</exec_depend>
   <exec_depend>moveit_ros_move_group</exec_depend>
+  <exec_depend>moveit_ros_visualization</exec_depend>
   <exec_depend>omron_amr_simulation</exec_depend>
   <exec_depend>onrobot_control</exec_depend>
   <exec_depend>onrobot_msgs</exec_depend>
@@ -32,6 +33,7 @@
   <exec_depend>onrobot_vg_description</exec_depend>
   <exec_depend>position_controllers</exec_depend>
   <exec_depend>rclpy</exec_depend>
+  <exec_depend>rviz2</exec_depend>
   <exec_depend>ros_gz_bridge</exec_depend>
   <exec_depend>ros_gz_interfaces</exec_depend>
   <exec_depend>sensor_msgs</exec_depend>
